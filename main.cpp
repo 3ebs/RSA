@@ -204,10 +204,6 @@ void uint512_t::mul(uint512_t x, uint512_t y)
 }
 void uint512_t::div(uint512_t x, uint512_t y, uint512_t &r)
 {
-    vector<unsigned long> * numberX = x.getUnits();
-    vector<unsigned long> * numberY = y.getUnits();
-    int xSize = (int)numberX->size();
-    int ySize = (int)numberY->size();
     unsigned long result = 0;
     string RES = "";
     string xNumber = x.getVal();
