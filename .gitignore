@@ -1,0 +1,5 @@
+.dep.inc
+.idea/
+*.txt
+*.bak
+cmake-build-debug/
