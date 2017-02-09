@@ -11,60 +11,69 @@ using namespace std::chrono;
 
 const unsigned long maxNumber = 1000000000;
 
-class uint512_t
+class bigNum
 {
 private:
     string longNumber;
     vector<unsigned long> number;
 public:
-    uint512_t();
-    uint512_t(string * number);
+    bigNum();
+    bigNum(string number);
     void storeBigNumber();
     string getVal();
     void setVal(string s);
     vector<unsigned long> * getUnits();
-    void add(uint512_t x, uint512_t y);
-    bool sub(uint512_t x, uint512_t y);
-    void mul(uint512_t x, uint512_t y);
-    void div(uint512_t x, uint512_t y, uint512_t &r);
+    void add(bigNum x, bigNum y);
+    bool sub(bigNum x, bigNum y);
+    void mul(bigNum x, bigNum y);
+    void div(bigNum x, bigNum y, bigNum &r);
+    void ExtendedEUCLID(bigNum m);
 };
 
 int main(int argc, char** argv)
 {
-    string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
-    string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
-    //string p = "P=275816384410077871";
-    //string q = "Q=929689473";
+    //string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
+    //string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
+    string p = "P=275816384410077871";
+    string q = "Q=929689473";
+    //string q = "Q=2";
     string e = "E=65537";
     //result = 296675817
     //remainder = 451503430
     p = p.substr(2);
     q = q.substr(2);
-    uint512_t P(&p);
-    uint512_t Q(&q);
-    uint512_t RES;
-    uint512_t remainder;
+    e = e.substr(2);
+    bigNum P(p);
+    bigNum Q(q);
+    bigNum RES("550");
+    bigNum remainder;
+    //bigNum RES;
+    bigNum Phi("1759");
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    RES.div(P, Q, remainder);
+    //P.sub(P, bigNum("1"));
+    //Q.sub(Q, bigNum("1"));
+    //Phi.mul(P, Q);
+    RES.ExtendedEUCLID(Phi);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
     cout << duration << endl;
+    cout << RES.getVal().length() << endl;
     cout << RES.getVal() << endl;
-    cout << remainder.getVal();
+    //cout << remainder.getVal() << endl;
     return 0;
 }
 
-uint512_t::uint512_t()
+bigNum::bigNum()
 {
     longNumber = "";
     number.clear();
 }
-uint512_t::uint512_t(string *number)
+bigNum::bigNum(string number)
 {
-    longNumber = *number;
+    longNumber = number;
     storeBigNumber();
 }
-void uint512_t::storeBigNumber()
+void bigNum::storeBigNumber()
 {
     number.clear();
     unsigned int length = (unsigned int)longNumber.length();
@@ -75,19 +84,19 @@ void uint512_t::storeBigNumber()
         number.push_back(stoul(longNumber.substr((unsigned long)i, 9)));
     }
 }
-string uint512_t::getVal()
+string bigNum::getVal()
 {
     return longNumber;
 }
-void uint512_t::setVal(string s)
+void bigNum::setVal(string s)
 {
     longNumber = s;
 }
-vector<unsigned long> * uint512_t::getUnits()
+vector<unsigned long> * bigNum::getUnits()
 {
     return &number;
 }
-void uint512_t::add(uint512_t x, uint512_t y)
+void bigNum::add(bigNum x, bigNum y)
 {
     string tempStr;
     string testDigits;
@@ -113,15 +122,18 @@ void uint512_t::add(uint512_t x, uint512_t y)
     longNumber = tempStr;
     storeBigNumber();
 }
-bool uint512_t::sub(uint512_t x, uint512_t y)
+bool bigNum::sub(bigNum x, bigNum y)
 {
     string tempStr;
     string testDigits;
     long long tempVal;
+    bool negFlag = false;
     vector<unsigned long> * numberX = x.getUnits();
     vector<unsigned long> * numberY = y.getUnits();
     while(numberX->size() > numberY->size()) numberY->insert(numberY->begin(), 0);
     while(numberY->size() > numberX->size()) numberX->insert(numberX->begin(), 0);
+    if(numberX[0] < numberY[0])
+        negFlag = true;
     int index = (int)numberX->size()-1;
     while(index >= 0)
     {
@@ -132,7 +144,7 @@ bool uint512_t::sub(uint512_t x, uint512_t y)
             if(index - 1 > 0) (*numberX)[index - 1] -= 1;
             else if(index - 1 == 0)
             {
-                if((*numberX)[0] > 0) (*numberX)[0] -= 1;
+                    if((*numberX)[0] > 0) (*numberX)[0] -= 1;
                 else return false;
             }
             else return false;
@@ -146,7 +158,7 @@ bool uint512_t::sub(uint512_t x, uint512_t y)
     storeBigNumber();
     return true;
 }
-void uint512_t::mul(uint512_t x, uint512_t y)
+void bigNum::mul(bigNum x, bigNum y)
 {
     string tempStr;
     string tempStrMain;
@@ -202,7 +214,7 @@ void uint512_t::mul(uint512_t x, uint512_t y)
     }
     storeBigNumber();
 }
-void uint512_t::div(uint512_t x, uint512_t y, uint512_t &r)
+void bigNum::div(bigNum x, bigNum y, bigNum &r)
 {
     unsigned long result = 0;
     string RES = "";
@@ -210,7 +222,7 @@ void uint512_t::div(uint512_t x, uint512_t y, uint512_t &r)
     string yNumber = y.getVal();
     string newX = "";
     bool lFlag = false;
-    uint512_t temp;
+    bigNum temp;
     if(xNumber[0] > yNumber[0])
         lFlag = true;
     if(yNumber.length() > xNumber.length())
@@ -248,4 +260,21 @@ void uint512_t::div(uint512_t x, uint512_t y, uint512_t &r)
     storeBigNumber();
     r.setVal(temp.getVal());
     r.storeBigNumber();
+}
+void bigNum::ExtendedEUCLID(bigNum m)
+{
+    bigNum Q; bigNum A1("1"); bigNum A2("0"); bigNum A3 = m; bigNum B1("0"); bigNum B2("1"); bigNum B3 = *this;
+    bigNum temp1, temp2, temp3;
+    bigNum remainder;
+    while(B3.getUnits()->back() != 1)
+    {
+        Q.div(A3, B3, remainder);
+        temp1 = A1; temp2 = A2; temp3 = A3;
+        A1 = B1; A2 = B2; A3 = B3;
+        B1.mul(B1, Q); B1.sub(temp1, B1);
+        B2.mul(B2, Q); B2.sub(temp2, B2);
+        B3.mul(B3, Q); B3.sub(temp3, B3);
+    }
+    longNumber = B2.getVal();
+    storeBigNumber();
 }
