@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <math.h>
 #include <vector>
 #include <list>
 #include <chrono>
@@ -32,27 +31,27 @@ public:
 
 int main(int argc, char** argv)
 {
-    //string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
-    //string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
-    string p = "P=275816384410077871";
-    string q = "Q=929689473";
+    string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
+    string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
+    //string p = "P=275816384410077871";
+    //string q = "Q=929689473";
     //string q = "Q=2";
     string e = "E=65537";
-    //result = 296675817
+    //result = 0.972419900668778913940496411652927926235133519062393125733139418081527304216095592474143190853638263840482287150816897222407759812540945065646542904603114781029868120176382272545130849374313739949011763592281607434368066112093436634627520723128652494732660932836905659553511274636677868014099163515203068324
     //remainder = 451503430
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
     bigNum P(p);
     bigNum Q(q);
-    bigNum RES("550");
+    bigNum RES(e);
     bigNum remainder;
     //bigNum RES;
-    bigNum Phi("1759");
+    bigNum Phi;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    //P.sub(P, bigNum("1"));
-    //Q.sub(Q, bigNum("1"));
-    //Phi.mul(P, Q);
+    P.sub(P, bigNum("1"));
+    Q.sub(Q, bigNum("1"));
+    Phi.mul(P, Q);
     RES.ExtendedEUCLID(Phi);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
@@ -127,13 +126,10 @@ bool bigNum::sub(bigNum x, bigNum y)
     string tempStr;
     string testDigits;
     long long tempVal;
-    bool negFlag = false;
     vector<unsigned long> * numberX = x.getUnits();
     vector<unsigned long> * numberY = y.getUnits();
     while(numberX->size() > numberY->size()) numberY->insert(numberY->begin(), 0);
     while(numberY->size() > numberX->size()) numberX->insert(numberX->begin(), 0);
-    if(numberX[0] < numberY[0])
-        negFlag = true;
     int index = (int)numberX->size()-1;
     while(index >= 0)
     {
@@ -206,6 +202,7 @@ void bigNum::mul(bigNum x, bigNum y)
         result.insert(result.begin(), 0);
         result[0] = offset;
     }
+    longNumber.clear();
     for(int i = 0; i < result.size(); i++)
     {
         tempStr = to_string(result[i]);
@@ -223,8 +220,18 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
     string newX = "";
     bool lFlag = false;
     bigNum temp;
+    if(y.getVal() == "0")
+    {
+        longNumber = "0";
+        storeBigNumber();
+        r.setVal("1");
+        r.storeBigNumber();
+        return;
+    }
     if(xNumber[0] > yNumber[0])
         lFlag = true;
+    while(yNumber.front() == '0') yNumber = yNumber.substr(1);
+    while(xNumber.front() == '0') xNumber = xNumber.substr(1);
     if(yNumber.length() > xNumber.length())
     {
         longNumber = "0";
@@ -263,17 +270,22 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
 }
 void bigNum::ExtendedEUCLID(bigNum m)
 {
-    bigNum Q; bigNum A1("1"); bigNum A2("0"); bigNum A3 = m; bigNum B1("0"); bigNum B2("1"); bigNum B3 = *this;
-    bigNum temp1, temp2, temp3;
+    bigNum Q; bigNum A2("0"); bigNum A3 = m; bigNum B2("1"); bigNum B3 = *this;
+    bigNum temp2, temp3;
     bigNum remainder;
     while(B3.getUnits()->back() != 1)
     {
         Q.div(A3, B3, remainder);
-        temp1 = A1; temp2 = A2; temp3 = A3;
-        A1 = B1; A2 = B2; A3 = B3;
-        B1.mul(B1, Q); B1.sub(temp1, B1);
-        B2.mul(B2, Q); B2.sub(temp2, B2);
-        B3.mul(B3, Q); B3.sub(temp3, B3);
+        temp2 = A2; temp3 = A3;
+        A3 = B3;
+        A2 = B2;
+        temp3.div(temp3, B3, B3);
+        B2.mul(B2, Q);
+        while(!(B2.sub(temp2, B2)))
+        {
+            temp2.add(temp2, m);
+        }
+        temp2.div(B2, m, B2);
     }
     longNumber = B2.getVal();
     storeBigNumber();
