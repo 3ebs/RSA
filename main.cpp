@@ -21,12 +21,12 @@ public:
     uint512_t(string * number);
     void storeBigNumber();
     string getVal();
-    void setVal(string * s);
+    void setVal(string s);
     vector<unsigned long> * getUnits();
     void add(uint512_t x, uint512_t y);
-    void sub(uint512_t x, uint512_t y);
+    bool sub(uint512_t x, uint512_t y);
     void mul(uint512_t x, uint512_t y);
-    void div(uint512_t x, uint512_t y);
+    void div(uint512_t x, uint512_t y, uint512_t &r);
 };
 
 int main(int argc, char** argv)
@@ -36,17 +36,21 @@ int main(int argc, char** argv)
     //string p = "P=275816384410077871";
     //string q = "Q=929689473";
     string e = "E=65537";
+    //result = 296675817
+    //remainder = 451503430
     p = p.substr(2);
     q = q.substr(2);
     uint512_t P(&p);
     uint512_t Q(&q);
     uint512_t RES;
+    uint512_t remainder;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    RES.mul(P, Q);
+    RES.div(P, Q, remainder);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
     cout << duration << endl;
-    cout << RES.getVal();
+    cout << RES.getVal() << endl;
+    cout << remainder.getVal();
     return 0;
 }
 
@@ -62,6 +66,7 @@ uint512_t::uint512_t(string *number)
 }
 void uint512_t::storeBigNumber()
 {
+    number.clear();
     unsigned int length = (unsigned int)longNumber.length();
     unsigned int remainder = length % 9;
     if(remainder > 0) number.push_back(stoul(longNumber.substr(0, remainder)));
@@ -74,9 +79,9 @@ string uint512_t::getVal()
 {
     return longNumber;
 }
-void uint512_t::setVal(string * s)
+void uint512_t::setVal(string s)
 {
-    longNumber = *s;
+    longNumber = s;
 }
 vector<unsigned long> * uint512_t::getUnits()
 {
@@ -108,7 +113,7 @@ void uint512_t::add(uint512_t x, uint512_t y)
     longNumber = tempStr;
     storeBigNumber();
 }
-void uint512_t::sub(uint512_t x, uint512_t y)
+bool uint512_t::sub(uint512_t x, uint512_t y)
 {
     string tempStr;
     string testDigits;
@@ -124,7 +129,13 @@ void uint512_t::sub(uint512_t x, uint512_t y)
         if(tempVal < 0)
         {
             while(tempVal < 0) tempVal += maxNumber;
-            if(index - 1 >= 0) (*numberX)[index - 1] -= 1; //may raise error
+            if(index - 1 > 0) (*numberX)[index - 1] -= 1;
+            else if(index - 1 == 0)
+            {
+                if((*numberX)[0] > 0) (*numberX)[0] -= 1;
+                else return false;
+            }
+            else return false;
         }
         testDigits = to_string(tempVal);
         while(testDigits.length() < 9) testDigits.insert(0, "0");
@@ -133,6 +144,7 @@ void uint512_t::sub(uint512_t x, uint512_t y)
     }
     longNumber = tempStr;
     storeBigNumber();
+    return true;
 }
 void uint512_t::mul(uint512_t x, uint512_t y)
 {
@@ -190,7 +202,54 @@ void uint512_t::mul(uint512_t x, uint512_t y)
     }
     storeBigNumber();
 }
-void uint512_t::div(uint512_t x, uint512_t y)
+void uint512_t::div(uint512_t x, uint512_t y, uint512_t &r)
 {
-
+    vector<unsigned long> * numberX = x.getUnits();
+    vector<unsigned long> * numberY = y.getUnits();
+    int xSize = (int)numberX->size();
+    int ySize = (int)numberY->size();
+    unsigned long result = 0;
+    string RES = "";
+    string xNumber = x.getVal();
+    string yNumber = y.getVal();
+    string newX = "";
+    bool lFlag = false;
+    uint512_t temp;
+    if(xNumber[0] > yNumber[0])
+        lFlag = true;
+    if(yNumber.length() > xNumber.length())
+    {
+        longNumber = "0";
+        storeBigNumber();
+        r = x;
+        return;
+    }
+    if(yNumber == xNumber)
+    {
+        longNumber = "1";
+        storeBigNumber();
+        r.setVal("0");
+        r.storeBigNumber();
+        return;
+    }
+    if(lFlag) newX += xNumber.substr(0, yNumber.length());
+    else newX += xNumber.substr(0, yNumber.length()+1);
+    temp.setVal(newX);
+    temp.storeBigNumber();
+    for(int i = (int)newX.length(); i < xNumber.length(); i++)
+    {
+        while(temp.sub(temp, y))
+            result++;
+        RES.append(to_string(result));
+        result = 0;
+        temp.setVal(temp.getVal()+xNumber[i]);
+        temp.storeBigNumber();
+    }
+    while(temp.sub(temp, y))
+        result++;
+    RES.append(to_string(result));
+    longNumber = RES;
+    storeBigNumber();
+    r.setVal(temp.getVal());
+    r.storeBigNumber();
 }
