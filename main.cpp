@@ -27,6 +27,8 @@ public:
     void mul(bigNum x, bigNum y);
     void div(bigNum x, bigNum y, bigNum &r);
     void ExtendedEUCLID(bigNum m);
+    bool isOddOrEven();
+    void pow(bigNum x, bigNum y, bigNum z);
 };
 
 int main(int argc, char** argv)
@@ -37,8 +39,7 @@ int main(int argc, char** argv)
     //string q = "Q=929689473";
     //string q = "Q=2";
     string e = "E=65537";
-    //result = 0.972419900668778913940496411652927926235133519062393125733139418081527304216095592474143190853638263840482287150816897222407759812540945065646542904603114781029868120176382272545130849374313739949011763592281607434368066112093436634627520723128652494732660932836905659553511274636677868014099163515203068324
-    //remainder = 451503430
+    bigNum t("0000");
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
@@ -49,7 +50,11 @@ int main(int argc, char** argv)
     //bigNum RES;
     bigNum Phi;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    if(P.isOddOrEven()) cout << "even" << endl;
+    else cout << "odd" << endl;
     P.sub(P, bigNum("1"));
+    if(P.isOddOrEven()) cout << "even" << endl;
+    else cout << "odd" << endl;
     Q.sub(Q, bigNum("1"));
     Phi.mul(P, Q);
     RES.ExtendedEUCLID(Phi);
@@ -75,6 +80,8 @@ bigNum::bigNum(string number)
 void bigNum::storeBigNumber()
 {
     number.clear();
+    while(longNumber.front() == '0') longNumber = longNumber.substr(1);
+    if(longNumber.length() == 0) longNumber = "0";
     unsigned int length = (unsigned int)longNumber.length();
     unsigned int remainder = length % 9;
     if(remainder > 0) number.push_back(stoul(longNumber.substr(0, remainder)));
@@ -289,4 +296,14 @@ void bigNum::ExtendedEUCLID(bigNum m)
     }
     longNumber = B2.getVal();
     storeBigNumber();
+}
+bool bigNum::isOddOrEven()
+{
+    char firstDigit = longNumber[longNumber.length()-1];
+    int first_digit = firstDigit - '0';
+    return first_digit % 2 == 0;
+}
+void bigNum::pow(bigNum x, bigNum y, bigNum z)
+{
+    
 }
