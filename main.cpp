@@ -26,9 +26,9 @@ public:
     bool sub(bigNum x, bigNum y);
     void mul(bigNum x, bigNum y);
     void div(bigNum x, bigNum y, bigNum &r);
-    void ExtendedEUCLID(bigNum m);
+    void ExtendedEUCLID(bigNum e, bigNum m);
     bool isOddOrEven();
-    void pow(bigNum x, bigNum y, bigNum z);
+    void pow(bigNum x, bigNum y, bigNum z, bigNum phiZ);
 };
 
 int main(int argc, char** argv)
@@ -39,29 +39,29 @@ int main(int argc, char** argv)
     //string q = "Q=929689473";
     //string q = "Q=2";
     string e = "E=65537";
-    bigNum t("0000");
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
     bigNum P(p);
     bigNum Q(q);
-    bigNum RES(e);
+    bigNum E(e);
+    bigNum D;
+    bigNum M("3");
+    bigNum RES;
+    bigNum N, phiN;
     bigNum remainder;
     //bigNum RES;
-    bigNum Phi;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    if(P.isOddOrEven()) cout << "even" << endl;
-    else cout << "odd" << endl;
+    N.mul(P, Q);
     P.sub(P, bigNum("1"));
-    if(P.isOddOrEven()) cout << "even" << endl;
-    else cout << "odd" << endl;
     Q.sub(Q, bigNum("1"));
-    Phi.mul(P, Q);
-    RES.ExtendedEUCLID(Phi);
+    phiN.mul(P, Q);
+    D.ExtendedEUCLID(E, phiN);
+    RES.pow(M, D, N, phiN);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
     cout << duration << endl;
-    cout << RES.getVal().length() << endl;
+    //cout << RES.getVal().length() << endl;
     cout << RES.getVal() << endl;
     //cout << remainder.getVal() << endl;
     return 0;
@@ -69,7 +69,8 @@ int main(int argc, char** argv)
 
 bigNum::bigNum()
 {
-    longNumber = "";
+    longNumber = "0";
+    storeBigNumber();
     number.clear();
 }
 bigNum::bigNum(string number)
@@ -275,9 +276,9 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
     r.setVal(temp.getVal());
     r.storeBigNumber();
 }
-void bigNum::ExtendedEUCLID(bigNum m)
+void bigNum::ExtendedEUCLID(bigNum e, bigNum m)
 {
-    bigNum Q; bigNum A2("0"); bigNum A3 = m; bigNum B2("1"); bigNum B3 = *this;
+    bigNum Q; bigNum A2("0"); bigNum A3 = m; bigNum B2("1"); bigNum B3 = e;
     bigNum temp2, temp3;
     bigNum remainder;
     while(B3.getUnits()->back() != 1)
@@ -303,7 +304,44 @@ bool bigNum::isOddOrEven()
     int first_digit = firstDigit - '0';
     return first_digit % 2 == 0;
 }
-void bigNum::pow(bigNum x, bigNum y, bigNum z)
+void bigNum::pow(bigNum x, bigNum y, bigNum z, bigNum phiZ)
 {
-    
+    /*bigNum temp;
+    bigNum m = x;
+    bigNum newPower("2");
+    bigNum res("1");
+    if(phiZ.getVal() != "0") temp.div(y, phiZ, y);
+    while(true)
+    {
+        if(!temp.sub(y, newPower)) break;
+        x.mul(x, x);
+        temp.div(x, z, x);
+        res.mul(res, x);
+        temp.div(res, z, res);
+        y.sub(y, newPower);
+        newPower.mul(newPower, bigNum("2"));
+    }
+    while (y.sub(y, bigNum("1")))
+    {
+        res.mul(res, m);
+        temp.div(res, z, res);
+    }
+
+    //temp.div(res, z, res);
+    longNumber = res.getVal();
+    storeBigNumber();*/
+    bigNum res("1");
+    bigNum temp;
+    while(y.getVal() != "0") {
+
+        if(!y.isOddOrEven()) { // Can also use (power & 1) to make code even faster
+            res.mul(res, x);
+            temp.div(res, z, res);
+        }
+        x.mul(x, x);
+        temp.div(x, z, x);
+        y.div(y, bigNum("2"), temp); // Can also use power >>= 1; to make code even faster
+    }
+    longNumber = res.getVal();
+    storeBigNumber();
 }
