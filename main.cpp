@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 #include <list>
-#include <math.h>
 #include <chrono>
 #include <algorithm>
 
@@ -44,6 +43,8 @@ public:
 
     bool isOddOrEven();
 
+    bool isPrime();
+
     char compare(bigNum x, bigNum y);
 
     void powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ);
@@ -59,32 +60,37 @@ int main(int argc, char **argv) {
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
+    string resu;
     bigNum P(p);
     bigNum Q(q);
     bigNum E(e);
     bigNum D;
-    bigNum M("234864513861231344134384313977414008432354");
+    bigNum M("38451318412214832125686731321548878946531235485491173283451587832134345");
     bigNum RES;
     bigNum N, phiN;
     bigNum remainder;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    bool x = P.isPrime();
+    if(x) resu = "Yes";
+    else resu = "No";
     //RES.div(bigNum("3"), bigNum("315"), remainder);
-    //D.div2(P, bigNum("2"), N);
-    N.mul(P, Q);
-    P.sub(P, bigNum("1"));
-    Q.sub(Q, bigNum("1"));
-    phiN.mul(P, Q);
+    //RES.div(P, bigNum("2"), remainder);
+    //N.mul(P, Q);
+    //P.sub(P, bigNum("1"));
+    //Q.sub(Q, bigNum("1"));
+    //phiN.mul(P, Q);
     //RES.div(phiN, E, remainder);
-    D.ExtendedEUCLID(E, phiN);
-    RES.powMod(M, D, N, phiN);
+    //D.ExtendedEUCLID(E, phiN);
+    //RES.powMod(M, D, N, phiN);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(t2 - t1).count();
     cout << duration/1000000 << endl;
     //cout << RES.getVal().length() << endl;
-    cout << RES.getVal() << endl;
-    cout << remainder.getVal() << endl;
+    //cout << RES.getVal() << endl;
+    //cout << remainder.getVal() << endl;
     //cout << D.getVal() << endl;
     //cout << N.getVal() << endl;
+    cout << resu << endl;
     return 0;
 }
 
@@ -310,17 +316,17 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
         RES.append(to_string(result));
         //cout << RES.length() << endl;
         result = 0;
-        while (yNumber.length() <= 18 && temp.getVal().length() < 18 && xNumber[i] != NULL) {
+//        while (temp.getVal().length() < yNumber.length() && xNumber[i] != NULL) {
             temp.setVal(temp.getVal() + xNumber[i]);
-            i++;
-        }
+//            i++;
+//        }
 //        while (xNumber[i] == '0' && i != xNumber.length()-1) {
 //            newX = temp.getVal();
 //            newX.pop_back();
 //            temp.setVal(newX);
 //            i--;
 //        }
-        i--;
+//        i--;
         temp.storeBigNumber();
     }
     if (yNumber.length() <= 18 && temp.getVal().length() <= 18) {
@@ -339,7 +345,7 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
     r.storeBigNumber();
 }
 
-void bigNum::div2(bigNum x, bigNum y, bigNum &r) {
+/*void bigNum::div2(bigNum x, bigNum y, bigNum &r) {
     unsigned long long result = 0;
     string RES = "";
     string xNumber = x.getVal();
@@ -401,7 +407,7 @@ void bigNum::div2(bigNum x, bigNum y, bigNum &r) {
     storeBigNumber();
     r.setVal(temp.getVal());
     r.storeBigNumber();
-}
+}*/
 
 /*void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r) {
     bigNum accumResult("0");
@@ -515,4 +521,30 @@ void bigNum::powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ) {
     }
     longNumber = res.getVal();
     storeBigNumber();
+}
+
+bool bigNum::isPrime() {
+    if(longNumber == "1" || longNumber == "4") return false;
+    else if(longNumber == "2" || longNumber == "3") return true;
+    if(isOddOrEven()) return false;
+    int k = 0;
+    bigNum temp;
+    bigNum q;
+    bigNum this_1;
+    this_1.sub(*this, bigNum("1"));
+    q = this_1;
+    bigNum remainder;
+    while(q.isOddOrEven()) {
+        q.div(q, bigNum("2"), remainder);
+        k++;
+    }
+    bigNum a("3");
+    temp.powMod(a, q, *this, bigNum("0"));
+    if(compare(temp, bigNum("1")) == 'e' || compare(temp, this_1) == 'e') return true;
+    for (int i = 0; i < k-1; ++i) {
+        temp.mul(temp, temp);
+        remainder.div(temp, *this, temp);
+        if(compare(temp, this_1) == 'e') return true;
+    }
+    return false;
 }
