@@ -26,6 +26,7 @@ public:
     bool sub(bigNum x, bigNum y);
     void mul(bigNum x, bigNum y);
     void div(bigNum x, bigNum y, bigNum &r);
+    void doubleDiv(bigNum x, bigNum y, bigNum &r);
     void ExtendedEUCLID(bigNum e, bigNum m);
     bool isOddOrEven();
     void pow(bigNum x, bigNum y, bigNum z, bigNum phiZ);
@@ -46,7 +47,7 @@ int main(int argc, char** argv)
     bigNum Q(q);
     bigNum E(e);
     bigNum D;
-    bigNum M("3");
+    bigNum M("234864513861231344134384313977414008432354");
     bigNum RES;
     bigNum N, phiN;
     bigNum remainder;
@@ -228,11 +229,19 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
     string newX = "";
     bool lFlag = false;
     bigNum temp;
-    if(y.getVal() == "0")
+    if(yNumber == "0")
     {
         longNumber = "0";
         storeBigNumber();
         r.setVal("1");
+        r.storeBigNumber();
+        return;
+    }
+    if(xNumber == "0")
+    {
+        longNumber = "0";
+        storeBigNumber();
+        r.setVal("0");
         r.storeBigNumber();
         return;
     }
@@ -276,6 +285,10 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
     r.setVal(temp.getVal());
     r.storeBigNumber();
 }
+void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r)
+{
+
+}
 void bigNum::ExtendedEUCLID(bigNum e, bigNum m)
 {
     bigNum Q; bigNum A2("0"); bigNum A3 = m; bigNum B2("1"); bigNum B3 = e;
@@ -306,41 +319,19 @@ bool bigNum::isOddOrEven()
 }
 void bigNum::pow(bigNum x, bigNum y, bigNum z, bigNum phiZ)
 {
-    /*bigNum temp;
-    bigNum m = x;
-    bigNum newPower("2");
-    bigNum res("1");
-    if(phiZ.getVal() != "0") temp.div(y, phiZ, y);
-    while(true)
-    {
-        if(!temp.sub(y, newPower)) break;
-        x.mul(x, x);
-        temp.div(x, z, x);
-        res.mul(res, x);
-        temp.div(res, z, res);
-        y.sub(y, newPower);
-        newPower.mul(newPower, bigNum("2"));
-    }
-    while (y.sub(y, bigNum("1")))
-    {
-        res.mul(res, m);
-        temp.div(res, z, res);
-    }
-
-    //temp.div(res, z, res);
-    longNumber = res.getVal();
-    storeBigNumber();*/
     bigNum res("1");
     bigNum temp;
-    while(y.getVal() != "0") {
-
-        if(!y.isOddOrEven()) { // Can also use (power & 1) to make code even faster
+    if(phiZ.getVal() != "0") temp.div(y, phiZ, y);
+    while(y.getVal() != "0")
+    {
+        if(!y.isOddOrEven())
+        {
             res.mul(res, x);
             temp.div(res, z, res);
         }
         x.mul(x, x);
         temp.div(x, z, x);
-        y.div(y, bigNum("2"), temp); // Can also use power >>= 1; to make code even faster
+        y.div(y, bigNum("2"), temp);
     }
     longNumber = res.getVal();
     storeBigNumber();
