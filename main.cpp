@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <list>
+#include <math.h>
 #include <chrono>
 #include <algorithm>
 
@@ -29,7 +30,8 @@ public:
     void doubleDiv(bigNum x, bigNum y, bigNum &r);
     void ExtendedEUCLID(bigNum e, bigNum m);
     bool isOddOrEven();
-    void pow(bigNum x, bigNum y, bigNum z, bigNum phiZ);
+    char compare(bigNum x, bigNum y);
+    void powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ);
 };
 
 int main(int argc, char** argv)
@@ -53,18 +55,19 @@ int main(int argc, char** argv)
     bigNum remainder;
     //bigNum RES;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    N.mul(P, Q);
-    P.sub(P, bigNum("1"));
-    Q.sub(Q, bigNum("1"));
-    phiN.mul(P, Q);
-    D.ExtendedEUCLID(E, phiN);
-    RES.pow(M, D, N, phiN);
+    RES.div(P, Q, remainder);
+    //N.mul(P, Q);
+    //P.sub(P, bigNum("1"));
+    //Q.sub(Q, bigNum("1"));
+    //phiN.mul(P, Q);
+    //D.ExtendedEUCLID(E, phiN);
+    //RES.powMod(M, D, N, phiN);
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
     cout << duration << endl;
     //cout << RES.getVal().length() << endl;
     cout << RES.getVal() << endl;
-    //cout << remainder.getVal() << endl;
+    cout << remainder.getVal() << endl;
     return 0;
 }
 
@@ -103,6 +106,25 @@ void bigNum::setVal(string s)
 vector<unsigned long> * bigNum::getUnits()
 {
     return &number;
+}
+char bigNum::compare(bigNum x, bigNum y)
+{
+    //'g' if x > y
+    //'l' if x < y
+    //'e' if x == y
+    string xNumber = x.getVal(); string yNumber = y.getVal();
+    if(xNumber == yNumber) return 'e';
+    if(xNumber.length() > yNumber.length()) return 'g';
+    else if(xNumber.length() < yNumber.length()) return 'l';
+    else if(xNumber.length() == yNumber.length())
+        for(int i = 0; i < xNumber.length(); i++)
+        {
+            if(xNumber[i] > yNumber[i])
+                return 'g';
+            else if(xNumber[i] < yNumber[i])
+                return 'l';
+        }
+    return 'n';
 }
 void bigNum::add(bigNum x, bigNum y)
 {
@@ -231,37 +253,28 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
     bigNum temp;
     if(yNumber == "0")
     {
-        longNumber = "0";
-        storeBigNumber();
-        r.setVal("1");
-        r.storeBigNumber();
+        longNumber = "0"; storeBigNumber();
+        r.setVal("1"); r.storeBigNumber();
         return;
     }
     if(xNumber == "0")
     {
-        longNumber = "0";
-        storeBigNumber();
-        r.setVal("0");
-        r.storeBigNumber();
+        longNumber = "0"; storeBigNumber();
+        r.setVal("0"); r.storeBigNumber();
         return;
     }
     if(xNumber[0] > yNumber[0])
         lFlag = true;
-    while(yNumber.front() == '0') yNumber = yNumber.substr(1);
-    while(xNumber.front() == '0') xNumber = xNumber.substr(1);
     if(yNumber.length() > xNumber.length())
     {
-        longNumber = "0";
-        storeBigNumber();
+        longNumber = "0"; storeBigNumber();
         r = x;
         return;
     }
     if(yNumber == xNumber)
     {
-        longNumber = "1";
-        storeBigNumber();
-        r.setVal("0");
-        r.storeBigNumber();
+        longNumber = "1"; storeBigNumber();
+        r.setVal("0"); r.storeBigNumber();
         return;
     }
     if(lFlag) newX += xNumber.substr(0, yNumber.length());
@@ -287,7 +300,67 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r)
 }
 void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r)
 {
-
+    bigNum accumResult("0");
+    bigNum chosenNum;
+    bigNum temp[4];
+    bigNum tempNum;
+    temp[3] = y; temp[2].mul(y, bigNum("2")); temp[1].mul(y, bigNum("4")); temp[0].mul(y, bigNum("8"));
+    string xNumber = x.getVal();
+    string yNumber = y.getVal();
+    string tempNumber;
+    string chosenNumber;
+    bool remainderFlag = false;
+    if(yNumber == "0")
+    {
+        longNumber = "0"; storeBigNumber();
+        r.setVal("1"); r.storeBigNumber();
+        return;
+    }
+    if(xNumber == "0")
+    {
+        longNumber = "0"; storeBigNumber();
+        r.setVal("0"); r.storeBigNumber();
+        return;
+    }
+    if(yNumber == xNumber)
+    {
+        longNumber = "1"; storeBigNumber();
+        r.setVal("0"); r.storeBigNumber();
+        return;
+    }
+    if(yNumber.length() > xNumber.length())
+    {
+        longNumber = "0"; storeBigNumber();
+        r = x;
+        return;
+    }
+    while(!remainderFlag)
+    {
+        remainderFlag = true;
+        for (int i = 0; i < 3; i++)
+        {
+            tempNum.setVal(x.getVal().substr(0, temp[i].getVal().length()));
+            tempNum.storeBigNumber();
+            if (compare(temp[i], tempNum) == 'l')
+            {
+                tempNumber = temp[i].getVal();
+                chosenNumber = to_string((int)pow(2, 3-i));
+                while (tempNumber.length() < x.getVal().length())
+                {
+                    tempNumber += '0';
+                    chosenNumber += '0';
+                }
+                chosenNum.setVal(chosenNumber);
+                chosenNum.storeBigNumber();
+                accumResult.add(accumResult, chosenNum);
+                x.sub(x, bigNum(tempNumber));
+                remainderFlag = false;
+                break;
+            }
+        }
+    }
+    r = x;
+    *this = accumResult;
 }
 void bigNum::ExtendedEUCLID(bigNum e, bigNum m)
 {
@@ -317,7 +390,7 @@ bool bigNum::isOddOrEven()
     int first_digit = firstDigit - '0';
     return first_digit % 2 == 0;
 }
-void bigNum::pow(bigNum x, bigNum y, bigNum z, bigNum phiZ)
+void bigNum::powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ)
 {
     bigNum res("1");
     bigNum temp;
