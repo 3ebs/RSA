@@ -5,6 +5,8 @@
 #include <chrono>
 #include <algorithm>
 
+#define DEBUG           1
+
 using namespace std;
 using namespace std::chrono;
 
@@ -51,46 +53,87 @@ public:
 };
 
 int main(int argc, char **argv) {
-    string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
-    string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
-    //string p = "P=275816384410077871";
-    //string q = "Q=929689473";
-    //string q = "Q=2";
-    string e = "E=65537";
+    string p;// = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
+    string q;// = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
+    string e;// = "E=65537";
+    string option;
+    cin >> p, q, e;
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
-    string resu;
     bigNum P(p);
     bigNum Q(q);
     bigNum E(e);
     bigNum D;
-    bigNum M("38451318412214832125686731321548878946531235485491173283451587832134345");
+    bigNum M;
     bigNum RES;
     bigNum N, phiN;
     bigNum remainder;
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    bool x = Q.isPrime(2);
-    if(x) resu = "Yes";
-    else resu = "No";
-    //RES.div(bigNum("3"), bigNum("315"), remainder);
-    //RES.div(P, bigNum("2"), remainder);
-    //N.mul(P, Q);
-    //P.sub(P, bigNum("1"));
-    //Q.sub(Q, bigNum("1"));
-    //phiN.mul(P, Q);
-    //RES.div(phiN, E, remainder);
-    //D.ExtendedEUCLID(E, phiN);
-    //RES.powMod(M, D, N, phiN);
-    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(t2 - t1).count();
-    cout << duration/1000000 << endl;
-    //cout << RES.getVal().length() << endl;
-    //cout << RES.getVal() << endl;
-    //cout << remainder.getVal() << endl;
-    //cout << D.getVal() << endl;
-    //cout << N.getVal() << endl;
-    cout << resu << endl;
+#if DEBUG
+    high_resolution_clock::time_point t1;
+    high_resolution_clock::time_point t2;
+#endif
+    while(true) {
+        cin >> option;
+#if DEBUG
+        t1 = high_resolution_clock::now();
+#endif
+        if(option == "IsPPrime") {
+            bool isPPrime = P.isPrime(1);
+            if (isPPrime) cout << "Yes" << endl;
+            else cout << "No" << endl;
+        }
+        else if(option == "IsQPrime") {
+            bool isQPrime = Q.isPrime(1);
+            if (isQPrime) cout << "Yes" << endl;
+            else cout << "No" << endl;
+        }
+        else if(option == "PrintN") {
+            N.mul(P, Q);
+            cout << N.getVal() << endl;
+        }
+        else if(option == "PrintPhi") {
+            D.sub(P, bigNum("1"));
+            M.sub(Q, bigNum("1"));
+            phiN.mul(D, M);
+            cout << phiN.getVal() << endl;
+        }
+        else if(option == "PrintD") {
+            D.sub(P, bigNum("1"));
+            M.sub(Q, bigNum("1"));
+            phiN.mul(D, M);
+            D.ExtendedEUCLID(E, phiN);
+            cout << D.getVal() << endl;
+        }
+        else if(option.substr(7, 6) == "Public") {
+            D.sub(P, bigNum("1"));
+            RES.sub(Q, bigNum("1"));
+            phiN.mul(D, RES);
+            N.mul(P, Q);
+            option.pop_back();
+            M = bigNum(option.substr(15));
+            RES.powMod(M, E, N, phiN);
+            cout << RES.getVal() << endl;
+        }
+        else if(option.substr(7, 7) == "Private") {
+            D.sub(P, bigNum("1"));
+            RES.sub(Q, bigNum("1"));
+            phiN.mul(D, RES);
+            N.mul(P, Q);
+            option.pop_back();
+            M = bigNum(option.substr(15));
+            D.ExtendedEUCLID(E, phiN);
+            RES.powMod(M, D, N, phiN);
+            cout << RES.getVal() << endl;
+        }
+        else if(option == "Quit")
+            break;
+#if DEBUG
+        t2 = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(t2 - t1).count();
+        cout << duration/1000000 << endl;
+#endif
+    }
     return 0;
 }
 
@@ -530,7 +573,9 @@ bool bigNum::isPrime(int n) {
     int k = 0;
     char primeCount = 0;
     bigNum temp;
+    bigNum tempA;
     bigNum q;
+    vector<bigNum> a;
     bigNum this_1;
     this_1.sub(*this, bigNum("1"));
     q = this_1;
@@ -539,10 +584,17 @@ bool bigNum::isPrime(int n) {
         q.div(q, bigNum("2"), remainder);
         k++;
     }
-    bigNum a[2];
-    a[0].setVal("3");
-    a[0].storeBigNumber();
-    a[1].sub(*this, bigNum("2"));
+    string randomNum;
+    int digitCount = (int)longNumber.length() / 2;
+    for (int l = 0; l < n; ++l) {
+        randomNum = "";
+        for(int i = 0; i < digitCount; i++) {
+            randomNum += to_string(rand() % 10 + 2);
+        }
+        while(randomNum.length() > digitCount) randomNum.pop_back();
+        a.push_back(bigNum(randomNum));
+    }
+
     for (int j = 0; j < n; ++j) {
         temp.powMod(a[j], q, *this, bigNum("0"));
         if(compare(temp, bigNum("1")) == 'e' || compare(temp, this_1) == 'e') {
