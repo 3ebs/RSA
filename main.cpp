@@ -10,13 +10,13 @@
 using namespace std;
 using namespace std::chrono;
 
-const unsigned long maxNumber = 1000000000;
-
 class bigNum {
 private:
     string longNumber;
     vector<unsigned long> number;
 public:
+    static unsigned long maxNumber;
+
     bigNum();
 
     bigNum(string number);
@@ -136,6 +136,8 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
+
+unsigned long bigNum::maxNumber = 1000000000;
 
 bigNum::bigNum() {
     longNumber = "0";
