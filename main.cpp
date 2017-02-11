@@ -43,7 +43,7 @@ public:
 
     bool isOddOrEven();
 
-    bool isPrime();
+    bool isPrime(int n);
 
     char compare(bigNum x, bigNum y);
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     bigNum N, phiN;
     bigNum remainder;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    bool x = P.isPrime();
+    bool x = Q.isPrime(2);
     if(x) resu = "Yes";
     else resu = "No";
     //RES.div(bigNum("3"), bigNum("315"), remainder);
@@ -523,11 +523,12 @@ void bigNum::powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ) {
     storeBigNumber();
 }
 
-bool bigNum::isPrime() {
+bool bigNum::isPrime(int n) {
     if(longNumber == "1" || longNumber == "4") return false;
     else if(longNumber == "2" || longNumber == "3") return true;
     if(isOddOrEven()) return false;
     int k = 0;
+    char primeCount = 0;
     bigNum temp;
     bigNum q;
     bigNum this_1;
@@ -538,13 +539,25 @@ bool bigNum::isPrime() {
         q.div(q, bigNum("2"), remainder);
         k++;
     }
-    bigNum a("3");
-    temp.powMod(a, q, *this, bigNum("0"));
-    if(compare(temp, bigNum("1")) == 'e' || compare(temp, this_1) == 'e') return true;
-    for (int i = 0; i < k-1; ++i) {
-        temp.mul(temp, temp);
-        remainder.div(temp, *this, temp);
-        if(compare(temp, this_1) == 'e') return true;
+    bigNum a[2];
+    a[0].setVal("3");
+    a[0].storeBigNumber();
+    a[1].sub(*this, bigNum("2"));
+    for (int j = 0; j < n; ++j) {
+        temp.powMod(a[j], q, *this, bigNum("0"));
+        if(compare(temp, bigNum("1")) == 'e' || compare(temp, this_1) == 'e') {
+            primeCount++;
+            continue;
+        }
+        for (int i = 0; i < k-1; ++i) {
+            temp.mul(temp, temp);
+            remainder.div(temp, *this, temp);
+            if(compare(temp, this_1) == 'e') {
+                primeCount++;
+                break;
+            }
+        }
     }
-    return false;
+    if(primeCount == n) return true;
+    else return false;
 }
