@@ -5,7 +5,7 @@
 #include <chrono>
 #include <algorithm>
 
-#define DEBUG           1
+#define DEBUG           true
 
 using namespace std;
 using namespace std::chrono;
@@ -39,7 +39,7 @@ public:
 
     void doubleDiv(bigNum x, bigNum y, bigNum &r);
 
-    void div2(bigNum x, bigNum y, bigNum &r);
+    //void div2(bigNum x, bigNum y, bigNum &r);
 
     void ExtendedEUCLID(bigNum e, bigNum m);
 
@@ -53,11 +53,11 @@ public:
 };
 
 int main(int argc, char **argv) {
-    string p;// = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
-    string q;// = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
-    string e;// = "E=65537";
+    string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
+    string q = "Q=2065420353441994803054315079370635087865508423962173447811880044936318158815802774220405304957787464676771309034463560633713497474362222775683960029689473";
+    string e = "E=65537";
     string option;
-    cin >> p, q, e;
+    //cin >> p >> q >> e;
     p = p.substr(2);
     q = q.substr(2);
     e = e.substr(2);
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 #if DEBUG
         t2 = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>(t2 - t1).count();
-        cout << duration/1000000 << endl;
+        cout << duration << endl;
 #endif
     }
     return 0;
@@ -454,15 +454,22 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
     r.storeBigNumber();
 }*/
 
-/*void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r) {
+void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r) {
     bigNum accumResult("0");
     bigNum chosenNum;
-    bigNum temp[4];
+    vector<bigNum> temp(4);
     bigNum tempNum;
-    temp[3] = y;
+    temp[3] = bigNum("1"+y.getVal());
     temp[2].mul(y, bigNum("2"));
+    temp[2].setVal("2"+temp[2].getVal());
+    temp[2].storeBigNumber();
     temp[1].mul(y, bigNum("4"));
+    temp[1].setVal("4"+temp[1].getVal());
+    temp[1].storeBigNumber();
     temp[0].mul(y, bigNum("8"));
+    temp[0].setVal("8"+temp[0].getVal());
+    temp[0].storeBigNumber();
+    sort(begin(temp), end(temp), [](bigNum &a, bigNum &b) {return a.getVal()[1] > b.getVal()[1];});
     string xNumber = x.getVal();
     string yNumber = y.getVal();
     string tempNumber;
@@ -482,30 +489,43 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
         r.storeBigNumber();
         return;
     }
-    if (yNumber == xNumber) {
+    if (compare(x, y) == 'l') {
+        longNumber = "0";
+        storeBigNumber();
+        r = x;
+        return;
+    }
+    else if (compare(x, y) == 'e') {
         longNumber = "1";
         storeBigNumber();
         r.setVal("0");
         r.storeBigNumber();
         return;
     }
-    if (yNumber.length() > xNumber.length()) {
-        longNumber = "0";
-        storeBigNumber();
-        r = x;
-        return;
-    }
+    bool myFlag = false;
+    char counter = 0;
     while (!remainderFlag) {
         remainderFlag = true;
-        for (int i = 0; i < 3; i++) {
-            tempNum.setVal(x.getVal().substr(0, temp[i].getVal().length()));
+        for (int i = 0; i < 4; i++) {
+            tempNum.setVal(x.getVal().substr(0, temp[i].getVal().length()-1));
             tempNum.storeBigNumber();
-            if (compare(temp[i], tempNum) == 'l') {
-                tempNumber = temp[i].getVal();
-                chosenNumber = to_string((int) pow(2, 3 - i));
-                while (tempNumber.length() < x.getVal().length()) {
-                    tempNumber += '0';
-                    chosenNumber += '0';
+            counter++;
+            if (compare(bigNum(temp[i].getVal().substr(1)), tempNum) == 'l' || compare(bigNum(temp[i].getVal().substr(1)), tempNum) == 'e' || myFlag) {
+                counter = 0;
+                tempNumber = temp[i].getVal().substr(1);
+                chosenNumber = to_string(temp[i].getVal()[0]-'0');
+                if(myFlag) {
+                    while (tempNumber.length() < x.getVal().length()-1) {
+                        tempNumber += '0';
+                        chosenNumber += '0';
+                    }
+                    myFlag = false;
+                }
+                else {
+                    while (tempNumber.length() < x.getVal().length()) {
+                        tempNumber += '0';
+                        chosenNumber += '0';
+                    }
                 }
                 chosenNum.setVal(chosenNumber);
                 chosenNum.storeBigNumber();
@@ -515,10 +535,20 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
                 break;
             }
         }
+        if(counter == 4) {
+            counter = 0;
+            for (int i = 0; i < 4; i++) {
+                if (x.getVal().length() > temp[i].getVal().substr(1).length()) {
+                    remainderFlag = false;
+                    myFlag = true;
+                    break;
+                }
+            }
+        }
     }
     r = x;
     *this = accumResult;
-}*/
+}
 
 void bigNum::ExtendedEUCLID(bigNum e, bigNum m) {
     bigNum Q;
