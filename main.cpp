@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
             phiN.mul(D, RES);
             N.mul(P, Q);
             option.pop_back();
-            M = bigNum(option.substr(15));
+            M = bigNum(option.substr(14));
             RES.powMod(M, E, N, phiN);
             cout << RES.getVal() << endl;
         }
