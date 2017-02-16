@@ -38,8 +38,6 @@ public:
 
     void div(bigNum x, bigNum y, bigNum &r);
 
-    void doubleDiv(bigNum x, bigNum y, bigNum &r);
-
     //void div2(bigNum x, bigNum y, bigNum &r);
 
     void ExtendedEUCLID(bigNum e, bigNum m);
@@ -78,6 +76,8 @@ int main(int argc, char **argv) {
         cin >> option;
 #if DEBUG
         t1 = high_resolution_clock::now();
+        N.add(P, Q);
+        cout << N.getVal() << endl << remainder.getVal() << endl;
 #endif
         if(option == "IsPPrime") {
             bool isPPrime = P.isPrime(1);
@@ -157,10 +157,10 @@ void bigNum::storeBigNumber() {
     if (longNumber.length() == 0) longNumber = "0";
     unsigned int length = (unsigned int) longNumber.length();
     unsigned int remainder = length % 9;
-    if (remainder > 0) number.push_back(stoul(longNumber.substr(0, remainder)));
-    for (int i = remainder; i < length; i += 9) {
+    if (remainder > 0)
+        number.push_back(stoul(longNumber.substr(0, remainder)));
+    for (int i = remainder; i < length; i += 9)
         number.push_back(stoul(longNumber.substr((unsigned long) i, 9)));
-    }
 }
 
 string bigNum::getVal() {
@@ -360,19 +360,8 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
             while (temp.sub(temp, y))
                 result++;
         RES.append(to_string(result));
-        //cout << RES.length() << endl;
         result = 0;
-//        while (temp.getVal().length() < yNumber.length() && xNumber[i] != NULL) {
-            temp.setVal(temp.getVal() + xNumber[i]);
-//            i++;
-//        }
-//        while (xNumber[i] == '0' && i != xNumber.length()-1) {
-//            newX = temp.getVal();
-//            newX.pop_back();
-//            temp.setVal(newX);
-//            i--;
-//        }
-//        i--;
+        temp.setVal(temp.getVal() + xNumber[i]);
         temp.storeBigNumber();
     }
     if (yNumber.length() <= 18 && temp.getVal().length() <= 18) {
@@ -380,11 +369,13 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
         result = stoull(temp.getVal()) / stoull(yNumber);
         temp.setVal(to_string(stoull(temp.getVal()) % stoull(yNumber)));
         temp.storeBigNumber();
+        RES.append(to_string(result));
     }
-    else
+    else {
         while (temp.sub(temp, y))
             result++;
-    RES.append(to_string(result));
+        RES.append(to_string(result));
+    }
     longNumber = RES;
     storeBigNumber();
     r.setVal(temp.getVal());
@@ -454,102 +445,6 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
     r.setVal(temp.getVal());
     r.storeBigNumber();
 }*/
-
-void bigNum::doubleDiv(bigNum x, bigNum y, bigNum &r) {
-    bigNum accumResult("0");
-    bigNum chosenNum;
-    vector<bigNum> temp(4);
-    bigNum tempNum;
-    temp[3] = bigNum("1"+y.getVal());
-    temp[2].mul(y, bigNum("2"));
-    temp[2].setVal("2"+temp[2].getVal());
-    temp[2].storeBigNumber();
-    temp[1].mul(y, bigNum("4"));
-    temp[1].setVal("4"+temp[1].getVal());
-    temp[1].storeBigNumber();
-    temp[0].mul(y, bigNum("8"));
-    temp[0].setVal("8"+temp[0].getVal());
-    temp[0].storeBigNumber();
-    sort(begin(temp), end(temp), [](bigNum &a, bigNum &b) {return a.getVal()[1] > b.getVal()[1];});
-    string xNumber = x.getVal();
-    string yNumber = y.getVal();
-    string tempNumber;
-    string chosenNumber;
-    bool remainderFlag = false;
-    if (yNumber == "0") {
-        longNumber = "0";
-        storeBigNumber();
-        r.setVal("1");
-        r.storeBigNumber();
-        return;
-    }
-    if (xNumber == "0") {
-        longNumber = "0";
-        storeBigNumber();
-        r.setVal("0");
-        r.storeBigNumber();
-        return;
-    }
-    if (compare(x, y) == 'l') {
-        longNumber = "0";
-        storeBigNumber();
-        r = x;
-        return;
-    }
-    else if (compare(x, y) == 'e') {
-        longNumber = "1";
-        storeBigNumber();
-        r.setVal("0");
-        r.storeBigNumber();
-        return;
-    }
-    bool myFlag = false;
-    char counter = 0;
-    while (!remainderFlag) {
-        remainderFlag = true;
-        for (int i = 0; i < 4; i++) {
-            tempNum.setVal(x.getVal().substr(0, temp[i].getVal().length()-1));
-            tempNum.storeBigNumber();
-            counter++;
-            if (compare(bigNum(temp[i].getVal().substr(1)), tempNum) == 'l' || compare(bigNum(temp[i].getVal().substr(1)), tempNum) == 'e' || myFlag) {
-                counter = 0;
-                tempNumber = temp[i].getVal().substr(1);
-                chosenNumber = to_string(temp[i].getVal()[0]-'0');
-                if(myFlag) {
-                    while (tempNumber.length() < x.getVal().length()-1) {
-                        tempNumber += '0';
-                        chosenNumber += '0';
-                    }
-                    myFlag = false;
-                }
-                else {
-                    while (tempNumber.length() < x.getVal().length()) {
-                        tempNumber += '0';
-                        chosenNumber += '0';
-                    }
-                }
-                chosenNum.setVal(chosenNumber);
-                chosenNum.storeBigNumber();
-                accumResult.add(accumResult, chosenNum);
-                x.sub(x, bigNum(tempNumber));
-                remainderFlag = false;
-                break;
-            }
-        }
-        if(counter == 4) {
-            counter = 0;
-            for (int i = 0; i < 4; i++) {
-                if (x.getVal().length() > temp[i].getVal().substr(1).length()) {
-                    remainderFlag = false;
-                    myFlag = true;
-                    break;
-                }
-            }
-        }
-    }
-    r = x;
-    *this = accumResult;
-}
 
 void bigNum::ExtendedEUCLID(bigNum e, bigNum m) {
     bigNum Q;
