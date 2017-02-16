@@ -105,6 +105,8 @@ int main(int argc, char **argv) {
             D.ExtendedEUCLID(E, phiN);
             cout << D.getVal() << endl;
         }
+        else if(option == "Quit")
+            break;
         else if(option.substr(7, 6) == "Public") {
             D.sub(P, bigNum("1"));
             RES.sub(Q, bigNum("1"));
@@ -126,8 +128,6 @@ int main(int argc, char **argv) {
             RES.powMod(M, D, N, phiN);
             cout << RES.getVal() << endl;
         }
-        else if(option == "Quit")
-            break;
 #if DEBUG
         t2 = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>(t2 - t1).count();
