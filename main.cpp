@@ -300,7 +300,7 @@ void bigNum::div(bigNum x, bigNum y, bigNum &r) {
     string yNumber = y.getVal();
     string newX;
     string newTemp;
-    bool lFlag = false;
+    bool lFlag;
     bigNum temp;
     if (yNumber == "0") {
         longNumber = "0";
