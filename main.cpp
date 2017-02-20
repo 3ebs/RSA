@@ -76,8 +76,6 @@ int main(int argc, char **argv) {
         cin >> option;
 #if DEBUG
         t1 = high_resolution_clock::now();
-        N.add(P, Q);
-        cout << N.getVal() << endl << remainder.getVal() << endl;
 #endif
         if(option == "IsPPrime") {
             bool isPPrime = P.isPrime(1);
