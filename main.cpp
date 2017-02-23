@@ -22,7 +22,7 @@ public:
     void storeBigNumber();
     string getVal() const;
     void setVal(string s);
-    vector<unsigned long> *getUnits() const;
+    inline vector<unsigned long> getUnits() const;
     void add(const bigNum &x, const bigNum &y);
     bool sub(const bigNum &x, const bigNum &y);
     void mul(const bigNum &x, const bigNum &y);
@@ -157,8 +157,8 @@ void bigNum::setVal(string s) {
     longNumber = s;
 }
 
-vector<unsigned long> * bigNum::getUnits() const {
-    return &number;
+vector<unsigned long> bigNum::getUnits() const{
+    return number;
 }
 
 char bigNum::compare(bigNum x, bigNum y) {
@@ -184,16 +184,16 @@ void bigNum::add(const bigNum &x, const bigNum &y) {
     string tempStr;
     string testDigits;
     unsigned long long tempVal;
-    vector<unsigned long> *numberX = x.getUnits();
-    vector<unsigned long> *numberY = y.getUnits();
-    while (numberX->size() > numberY->size()) numberY->insert(numberY->begin(), 0);
-    while (numberY->size() > numberX->size()) numberX->insert(numberX->begin(), 0);
-    int index = (int) numberX->size() - 1;
+    vector<unsigned long> numberX = x.getUnits();
+    vector<unsigned long> numberY = y.getUnits();
+    while (numberX.size() > numberY.size()) numberY.insert(numberY.begin(), 0);
+    while (numberY.size() > numberX.size()) numberX.insert(numberX.begin(), 0);
+    int index = (int) numberX.size() - 1;
     while (index >= 0) {
-        tempVal = (*numberX)[index] + (*numberY)[index];
+        tempVal = (numberX)[index] + (numberY)[index];
         if (tempVal > maxNumber - 1) {
             tempVal %= maxNumber;
-            if (index - 1 >= 0) (*numberX)[index - 1] += 1; //may be error if it's already 2^32 - 1
+            if (index - 1 >= 0) (numberX)[index - 1] += 1; //may be error if it's already 2^32 - 1
         }
         testDigits = to_string(tempVal);
         while (testDigits.length() < 9) testDigits.insert(0, "0");
@@ -208,18 +208,18 @@ bool bigNum::sub(const bigNum &x, const bigNum &y) {
     string tempStr;
     string testDigits;
     long long tempVal;
-    vector<unsigned long> *numberX = x.getUnits();
-    vector<unsigned long> *numberY = y.getUnits();
-    while (numberX->size() > numberY->size()) numberY->insert(numberY->begin(), 0);
-    while (numberY->size() > numberX->size()) numberX->insert(numberX->begin(), 0);
-    int index = (int) numberX->size() - 1;
+    vector<unsigned long> numberX = x.getUnits();
+    vector<unsigned long> numberY = y.getUnits();
+    while (numberX.size() > numberY.size()) numberY.insert(numberY.begin(), 0);
+    while (numberY.size() > numberX.size()) numberX.insert(numberX.begin(), 0);
+    int index = (int) numberX.size() - 1;
     while (index >= 0) {
-        tempVal = (long long) ((*numberX)[index] - (*numberY)[index]);
+        tempVal = (long long) ((numberX)[index] - (numberY)[index]);
         if (tempVal < 0) {
             while (tempVal < 0) tempVal += maxNumber;
-            if (index - 1 > 0) (*numberX)[index - 1] -= 1;
+            if (index - 1 > 0) (numberX)[index - 1] -= 1;
             else if (index - 1 == 0) {
-                if ((*numberX)[0] > 0) (*numberX)[0] -= 1;
+                if ((numberX)[0] > 0) (numberX)[0] -= 1;
                 else return false;
             } else return false;
         }
@@ -239,13 +239,13 @@ void bigNum::mul(const bigNum &x, const bigNum &y) {
     string tempStrSec;
     unsigned long long offset = 0;
     unsigned int tempVal;
-    vector<unsigned long> *numberX = x.getUnits();
-    vector<unsigned long> *numberY = y.getUnits();
-    int total_length = (int) (numberX->size() + numberY->size()) - 1;
+    vector<unsigned long> numberX = x.getUnits();
+    vector<unsigned long> numberY = y.getUnits();
+    int total_length = (int) (numberX.size() + numberY.size()) - 1;
     vector<unsigned long long> result((unsigned long) total_length, 0);
-    for (int i = (int) numberX->size() - 1; i >= 0; i--) {
-        for (int j = (int) numberY->size() - 1; j >= 0; j--) {
-            result[(i + j)] += (*numberX)[i] * (*numberY)[j];
+    for (int i = (int) numberX.size() - 1; i >= 0; i--) {
+        for (int j = (int) numberY.size() - 1; j >= 0; j--) {
+            result[(i + j)] += (numberX)[i] * (numberY)[j];
         }
     }
     for (int i = (int) result.size() - 1; i >= 0; i--) {
@@ -440,7 +440,7 @@ void bigNum::ExtendedEUCLID(const bigNum &e, const bigNum &m) {
     bigNum B3 = e;
     bigNum temp2, temp3;
     bigNum remainder;
-    while (B3.getUnits()->back() != 1) {
+    while (B3.getUnits().back() != 1) {
         Q.div(A3, B3, remainder);
         temp2 = A2;
         temp3 = A3;
