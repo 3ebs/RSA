@@ -24,8 +24,8 @@ public:
     void setVal(string s);
     vector<unsigned long> *getUnits() const;
     void add(const bigNum &x, const bigNum &y);
-    bool sub(bigNum x, bigNum y);
-    void mul(bigNum x, bigNum y);
+    bool sub(const bigNum &x, const bigNum &y);
+    void mul(const bigNum &x, const bigNum &y);
     void div(bigNum x, bigNum y, bigNum &r);
     void ExtendedEUCLID(bigNum e, bigNum m);
     bool isOddOrEven();
@@ -204,7 +204,7 @@ void bigNum::add(const bigNum &x, const bigNum &y) {
     storeBigNumber();
 }
 
-bool bigNum::sub(bigNum x, bigNum y) {
+bool bigNum::sub(const bigNum &x, const bigNum &y) {
     string tempStr;
     string testDigits;
     long long tempVal;
@@ -233,7 +233,7 @@ bool bigNum::sub(bigNum x, bigNum y) {
     return true;
 }
 
-void bigNum::mul(bigNum x, bigNum y) {
+void bigNum::mul(const bigNum &x, const bigNum &y) {
     string tempStr;
     string tempStrMain;
     string tempStrSec;
