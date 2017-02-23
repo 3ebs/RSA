@@ -26,7 +26,7 @@ public:
     void add(const bigNum &x, const bigNum &y);
     bool sub(const bigNum &x, const bigNum &y);
     void mul(const bigNum &x, const bigNum &y);
-    void div(bigNum x, bigNum y, bigNum &r);
+    void div(const bigNum &x, const bigNum &y, bigNum &r);
     void ExtendedEUCLID(bigNum e, bigNum m);
     bool isOddOrEven();
     bool isPrime(int n);
@@ -279,7 +279,7 @@ void bigNum::mul(const bigNum &x, const bigNum &y) {
     storeBigNumber();
 }
 
-void bigNum::div(bigNum x, bigNum y, bigNum &r) {
+void bigNum::div(const bigNum &x, const bigNum &y, bigNum &r) {
     unsigned long long result = 0;
     string RES = "";
     string xNumber = x.getVal();
