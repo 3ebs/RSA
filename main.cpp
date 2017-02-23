@@ -1,9 +1,6 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <list>
 #include <chrono>
-#include <algorithm>
 
 #define DEBUG           true
 #define USE_DEFAULT     false
