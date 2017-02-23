@@ -20,7 +20,7 @@ public:
     bigNum();
     bigNum(string number);
     void storeBigNumber();
-    string getVal() const;
+    inline string getVal() const;
     void setVal(string s);
     inline vector<unsigned long> getUnits() const;
     void add(const bigNum &x, const bigNum &y);
