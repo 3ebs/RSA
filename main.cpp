@@ -318,8 +318,6 @@ void bigNum::div(const bigNum &x, const bigNum &y, bigNum &r) {
     string xNumber = x.getVal();
     string yNumber = y.getVal();
     string newX;
-    string newTemp;
-    bool lFlag;
     bigNum temp;
     if (yNumber == "0") {
         longNumber = "0";
@@ -335,28 +333,20 @@ void bigNum::div(const bigNum &x, const bigNum &y, bigNum &r) {
         r.storeBigNumber();
         return;
     }
-    if (x > y)
-        if(xNumber[0] >= yNumber[0])
-            lFlag = true;
-        else
-            lFlag = false;
-    else if (x < y) {
+    if (x < y) {
         longNumber = "0";
         storeBigNumber();
         r = x;
         return;
     }
-    else {
+    if(x == y) {
         longNumber = "1";
         storeBigNumber();
         r.setVal("0");
         r.storeBigNumber();
         return;
     }
-    if (lFlag)
-        newX = xNumber.substr(0, yNumber.length());
-    else
-        newX = xNumber.substr(0, yNumber.length() + 1);
+    newX = xNumber.substr(0, yNumber.length() + 1);
     if(yNumber.length() <= 18) {
         if(xNumber.length() >= 18) {
             newX = xNumber.substr(0, 18);
