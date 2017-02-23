@@ -31,7 +31,6 @@ public:
     void ExtendedEUCLID(const bigNum &e, const bigNum &m);
     bool isOddOrEven();
     bool isPrime(int n);
-    char compare(bigNum x, bigNum y);
     bool operator==(const bigNum &x)const;
     bool operator<=(const bigNum &x)const;
     bool operator>=(const bigNum &x)const;
@@ -162,25 +161,6 @@ void bigNum::setVal(string s) {
 
 vector<unsigned long> bigNum::getUnits() const{
     return number;
-}
-
-char bigNum::compare(bigNum x, bigNum y) {
-    //'g' if x > y
-    //'l' if x < y
-    //'e' if x == y
-    string xNumber = x.getVal();
-    string yNumber = y.getVal();
-    if (xNumber == yNumber) return 'e';
-    if (xNumber.length() > yNumber.length()) return 'g';
-    else if (xNumber.length() < yNumber.length()) return 'l';
-    else if (xNumber.length() == yNumber.length())
-        for (int i = 0; i < xNumber.length(); i++) {
-            if (xNumber[i] > yNumber[i])
-                return 'g';
-            else if (xNumber[i] < yNumber[i])
-                return 'l';
-        }
-    return 'n';
 }
 
 bool bigNum::operator==(const bigNum &x) const {
@@ -544,7 +524,7 @@ bool bigNum::isPrime(int n) {
     bigNum temp;
     bigNum tempA;
     bigNum q;
-    vector<bigNum> a;
+    vector<bigNum> a(n);
     bigNum this_1;
     this_1.sub(*this, one);
     q = this_1;
@@ -561,7 +541,7 @@ bool bigNum::isPrime(int n) {
             randomNum += to_string(rand() % 10 + 2);
         }
         while(randomNum.length() > digitCount) randomNum.pop_back();
-        a.push_back(bigNum(randomNum));
+        a[l] = (bigNum(randomNum));
     }
 
     for (int j = 0; j < n; ++j) {
