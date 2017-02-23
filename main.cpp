@@ -17,37 +17,25 @@ private:
     string longNumber;
     vector<unsigned long> number;
 public:
-
     bigNum();
-
     bigNum(string number);
-
     void storeBigNumber();
-
-    string getVal();
-
+    string getVal() const;
     void setVal(string s);
-
-    vector<unsigned long> *getUnits();
-
-    void add(bigNum x, bigNum y);
-
+    vector<unsigned long> *getUnits() const;
+    void add(const bigNum &x, const bigNum &y);
     bool sub(bigNum x, bigNum y);
-
     void mul(bigNum x, bigNum y);
-
     void div(bigNum x, bigNum y, bigNum &r);
-
-    //void div2(bigNum x, bigNum y, bigNum &r);
-
     void ExtendedEUCLID(bigNum e, bigNum m);
-
     bool isOddOrEven();
-
     bool isPrime(int n);
-
     char compare(bigNum x, bigNum y);
-
+    bool operator==(bigNum &x);
+    bool operator<=(bigNum &x);
+    bool operator>=(bigNum &x);
+    bool operator<(bigNum &x);
+    bool operator>(bigNum &x);
     void powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ);
 };
 
@@ -161,7 +149,7 @@ void bigNum::storeBigNumber() {
         number.push_back(stoul(longNumber.substr((unsigned long) i, 9)));
 }
 
-string bigNum::getVal() {
+string bigNum::getVal() const {
     return longNumber;
 }
 
@@ -169,7 +157,7 @@ void bigNum::setVal(string s) {
     longNumber = s;
 }
 
-vector<unsigned long> *bigNum::getUnits() {
+vector<unsigned long> * bigNum::getUnits() const {
     return &number;
 }
 
@@ -192,7 +180,7 @@ char bigNum::compare(bigNum x, bigNum y) {
     return 'n';
 }
 
-void bigNum::add(bigNum x, bigNum y) {
+void bigNum::add(const bigNum &x, const bigNum &y) {
     string tempStr;
     string testDigits;
     unsigned long long tempVal;
