@@ -180,6 +180,56 @@ char bigNum::compare(bigNum x, bigNum y) {
     return 'n';
 }
 
+bool bigNum::operator==(bigNum &x) {
+    return x.getVal() == this->getVal();
+}
+
+bool bigNum::operator<=(bigNum &x) {
+    string xNumber = x.getVal();
+    string yNumber = this->getVal();
+    if(*this == x) return true;
+    if (xNumber.length() > yNumber.length()) return true;
+    if (xNumber.length() == yNumber.length())
+        for (int i = 0; i < xNumber.length(); ++i)
+            if (xNumber[i] > yNumber[i])
+                return true;
+    return false;
+}
+
+bool bigNum::operator>=(bigNum &x) {
+    string xNumber = x.getVal();
+    string yNumber = this->getVal();
+    if(*this == x) return true;
+    if (xNumber.length() < yNumber.length()) return true;
+    if (xNumber.length() == yNumber.length())
+        for (int i = 0; i < xNumber.length(); ++i)
+            if (xNumber[i] < yNumber[i])
+                return true;
+    return false;
+}
+
+bool bigNum::operator<(bigNum &x) {
+    string xNumber = x.getVal();
+    string yNumber = this->getVal();
+    if (xNumber.length() > yNumber.length()) return true;
+    if (xNumber.length() == yNumber.length())
+        for (int i = 0; i < xNumber.length(); ++i)
+            if (xNumber[i] > yNumber[i])
+                return true;
+    return false;
+}
+
+bool bigNum::operator>(bigNum &x) {
+    string xNumber = x.getVal();
+    string yNumber = this->getVal();
+    if (xNumber.length() < yNumber.length()) return true;
+    if (xNumber.length() == yNumber.length())
+        for (int i = 0; i < xNumber.length(); ++i)
+            if (xNumber[i] < yNumber[i])
+                return true;
+    return false;
+}
+
 void bigNum::add(const bigNum &x, const bigNum &y) {
     string tempStr;
     string testDigits;
