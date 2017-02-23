@@ -32,12 +32,16 @@ public:
     bool isOddOrEven();
     bool isPrime(int n);
     char compare(bigNum x, bigNum y);
-    bool operator==(bigNum &x);
-    bool operator<=(bigNum &x);
-    bool operator>=(bigNum &x);
-    bool operator<(bigNum &x);
-    bool operator>(bigNum &x);
+    bool operator==(const bigNum &x)const;
+    bool operator<=(const bigNum &x)const;
+    bool operator>=(const bigNum &x)const;
+    bool operator<(const bigNum &x)const;
+    bool operator>(const bigNum &x)const;
 };
+
+bigNum zero("0");
+bigNum one("1");
+bigNum two("2");
 
 int main(int argc, char **argv) {
     string p = "P=12369571528747655798110188786567180759626910465726920556567298659370399748072366507234899432827475865189642714067836207300153035059472237275816384410077871";
@@ -125,7 +129,6 @@ int main(int argc, char **argv) {
 }
 
 
-
 bigNum::bigNum() {
     longNumber = "0";
     storeBigNumber();
@@ -180,11 +183,11 @@ char bigNum::compare(bigNum x, bigNum y) {
     return 'n';
 }
 
-bool bigNum::operator==(bigNum &x) {
+bool bigNum::operator==(const bigNum &x) const {
     return x.getVal() == this->getVal();
 }
 
-bool bigNum::operator<=(bigNum &x) {
+bool bigNum::operator<=(const bigNum &x) const {
     string xNumber = x.getVal();
     string yNumber = this->getVal();
     if(*this == x) return true;
@@ -196,7 +199,7 @@ bool bigNum::operator<=(bigNum &x) {
     return false;
 }
 
-bool bigNum::operator>=(bigNum &x) {
+bool bigNum::operator>=(const bigNum &x) const {
     string xNumber = x.getVal();
     string yNumber = this->getVal();
     if(*this == x) return true;
@@ -208,7 +211,7 @@ bool bigNum::operator>=(bigNum &x) {
     return false;
 }
 
-bool bigNum::operator<(bigNum &x) {
+bool bigNum::operator<(const bigNum &x) const {
     string xNumber = x.getVal();
     string yNumber = this->getVal();
     if (xNumber.length() > yNumber.length()) return true;
@@ -219,7 +222,7 @@ bool bigNum::operator<(bigNum &x) {
     return false;
 }
 
-bool bigNum::operator>(bigNum &x) {
+bool bigNum::operator>(const bigNum &x) const {
     string xNumber = x.getVal();
     string yNumber = this->getVal();
     if (xNumber.length() < yNumber.length()) return true;
@@ -352,12 +355,12 @@ void bigNum::div(const bigNum &x, const bigNum &y, bigNum &r) {
         r.storeBigNumber();
         return;
     }
-    if (compare(x, y) == 'g')
+    if (x > y)
         if(xNumber[0] >= yNumber[0])
             lFlag = true;
         else
             lFlag = false;
-    else if (compare(x, y) == 'l') {
+    else if (x < y) {
         longNumber = "0";
         storeBigNumber();
         r = x;
@@ -543,11 +546,11 @@ bool bigNum::isPrime(int n) {
     bigNum q;
     vector<bigNum> a;
     bigNum this_1;
-    this_1.sub(*this, bigNum("1"));
+    this_1.sub(*this, one);
     q = this_1;
     bigNum remainder;
     while(q.isOddOrEven()) {
-        q.div(q, bigNum("2"), remainder);
+        q.div(q, two, remainder);
         k++;
     }
     string randomNum;
@@ -562,15 +565,15 @@ bool bigNum::isPrime(int n) {
     }
 
     for (int j = 0; j < n; ++j) {
-        temp.powMod(a[j], q, *this, bigNum("0"));
-        if(compare(temp, bigNum("1")) == 'e' || compare(temp, this_1) == 'e') {
+        temp.powMod(a[j], q, *this, zero);
+        if(temp == one || temp == this_1) {
             primeCount++;
             continue;
         }
         for (int i = 0; i < k-1; ++i) {
             temp.mul(temp, temp);
             remainder.div(temp, *this, temp);
-            if(compare(temp, this_1) == 'e') {
+            if(temp == this_1) {
                 primeCount++;
                 break;
             }
