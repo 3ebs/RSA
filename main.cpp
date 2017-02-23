@@ -27,7 +27,8 @@ public:
     bool sub(const bigNum &x, const bigNum &y);
     void mul(const bigNum &x, const bigNum &y);
     void div(const bigNum &x, const bigNum &y, bigNum &r);
-    void ExtendedEUCLID(bigNum e, bigNum m);
+    void powMod(const bigNum &a, const bigNum &b, const bigNum &z, const bigNum &phiZ);
+    void ExtendedEUCLID(const bigNum &e, const bigNum &m);
     bool isOddOrEven();
     bool isPrime(int n);
     char compare(bigNum x, bigNum y);
@@ -36,7 +37,6 @@ public:
     bool operator>=(bigNum &x);
     bool operator<(bigNum &x);
     bool operator>(bigNum &x);
-    void powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ);
 };
 
 int main(int argc, char **argv) {
@@ -432,7 +432,7 @@ void bigNum::div(const bigNum &x, const bigNum &y, bigNum &r) {
     r.storeBigNumber();
 }*/
 
-void bigNum::ExtendedEUCLID(bigNum e, bigNum m) {
+void bigNum::ExtendedEUCLID(const bigNum &e, const bigNum &m) {
     bigNum Q;
     bigNum A2("0");
     bigNum A3 = m;
@@ -463,8 +463,10 @@ bool bigNum::isOddOrEven() {
     return first_digit % 2 == 0;
 }
 
-void bigNum::powMod(bigNum x, bigNum y, bigNum z, bigNum phiZ) {
+void bigNum::powMod(const bigNum &a, const bigNum &b, const bigNum &z, const bigNum &phiZ) {
     bigNum res("1");
+    bigNum x = a;
+    bigNum y = b;
     bigNum temp;
     if (phiZ.getVal() != "0") temp.div(y, phiZ, y);
     while (y.getVal() != "0") {
