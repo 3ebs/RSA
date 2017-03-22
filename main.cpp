@@ -28,7 +28,7 @@ public:
     void powMod(const bigNum &a, const bigNum &b, const bigNum &z, const bigNum &phiZ);
     void ExtendedEUCLID(const bigNum &e, const bigNum &m);
     bool isOddOrEven();
-    bool isPrime(int n);
+    bool isPrime(int n, int _random=1);
     bool operator==(const bigNum &x)const;
     bool operator<=(const bigNum &x)const;
     bool operator>=(const bigNum &x)const;
@@ -68,18 +68,18 @@ int main(int argc, char **argv) {
     high_resolution_clock::time_point t1;
     high_resolution_clock::time_point t2;
 #endif
-    while(true) {
+    while (true) {
         cin >> option;
 #if DEBUG
         t1 = high_resolution_clock::now();
 #endif
         if(option == "IsPPrime") {
-            bool isPPrime = P.isPrime(1);
+            bool isPPrime = P.isPrime(2, 0);
             if (isPPrime) cout << "Yes" << endl;
             else cout << "No" << endl;
         }
         else if(option == "IsQPrime") {
-            bool isQPrime = Q.isPrime(1);
+            bool isQPrime = Q.isPrime(2, 0);
             if (isQPrime) cout << "Yes" << endl;
             else cout << "No" << endl;
         }
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
             phiN.mul(D, RES);
             N.mul(P, Q);
             option.pop_back();
-            M = bigNum(option.substr(14));
+            M = bigNum(option.substr(15));
             RES.powMod(M, E, N, phiN);
             cout << RES.getVal() << endl;
         }
@@ -118,15 +118,15 @@ int main(int argc, char **argv) {
             phiN.mul(D, RES);
             N.mul(P, Q);
             option.pop_back();
-            M = bigNum(option.substr(15));
+            M = bigNum(option.substr(16));
             D.ExtendedEUCLID(E, phiN);
             RES.powMod(M, D, N, phiN);
             cout << RES.getVal() << endl;
         }
 #if DEBUG
         t2 = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(t2 - t1).count();
-        cout << duration << endl;
+        auto duration = duration_cast<seconds>(t2 - t1).count();
+        cout << "execution time = " << duration << " seconds" << endl;
 #endif
     }
     return 0;
@@ -446,9 +446,11 @@ void bigNum::powMod(const bigNum &a, const bigNum &b, const bigNum &z, const big
     storeBigNumber();
 }
 
-bool bigNum::isPrime(int n) {
-    if(longNumber == "1" || longNumber == "4") return false;
-    else if(longNumber == "2" || longNumber == "3") return true;
+bool bigNum::isPrime(int n, int _random) {
+    if(longNumber == "1" || longNumber == "4")
+        return false;
+    else if(longNumber == "2" || longNumber == "3")
+        return true;
     if(isOddOrEven()) return false;
     int k = 0;
     char primeCount = 0;
@@ -464,17 +466,23 @@ bool bigNum::isPrime(int n) {
         q.div(q, two, remainder);
         k++;
     }
-    string randomNum;
-    int digitCount = (int)longNumber.length() / 2;
-    for (int l = 0; l < n; ++l) {
-        randomNum = "";
-        for(int i = 0; i < digitCount; i++) {
-            randomNum += to_string(rand() % 10 + 2);
+    if(_random) {
+        string randomNum;
+        int digitCount = (int) longNumber.length() / 2;
+        for (int l = 0; l < n; ++l) {
+            randomNum = "";
+            for (int i = 0; i < digitCount; i++) {
+                randomNum += to_string(rand() % 10 + 2);
+            }
+            while (randomNum.length() > digitCount) randomNum.pop_back();
+            a[l] = (bigNum(randomNum));
         }
-        while(randomNum.length() > digitCount) randomNum.pop_back();
-        a[l] = (bigNum(randomNum));
     }
-
+    else {
+        for(int i= 2; i < 2+n; ++i) {
+            a[i-2] = bigNum(to_string(i));
+        }
+    }
     for (int j = 0; j < n; ++j) {
         temp.powMod(a[j], q, *this, zero);
         if(temp == one || temp == this_1) {
@@ -490,6 +498,8 @@ bool bigNum::isPrime(int n) {
             }
         }
     }
-    if(primeCount == n) return true;
-    else return false;
+    if(primeCount)
+        return true;
+    else
+        return false;
 }
